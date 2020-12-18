@@ -10,6 +10,6 @@ COPY main ./
 #RUN go build -o main .
 
 # Expose port to the outside world
-#EXPOSE 9191
+EXPOSE 8901
 # Run the executable
 CMD ["./main"]
