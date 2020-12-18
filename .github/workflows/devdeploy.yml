@@ -42,7 +42,7 @@ jobs:
     if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
     runs-on: ubuntu-latest
     container:
-      image: golang:latest
+      image: ubuntu:latest
       options: --user 1001
     
     needs: check
@@ -100,11 +100,11 @@ jobs:
     needs: [check,build]
     steps:
     - name: Kubernetes create secrect
-      run: kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
+      run: sudo kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
     - name: Kubernetes deploy
       run: |
         sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
         #force pull latest image
         sudo kubectl -n ${SERVER} rollout restart deploy ${DEPLOY_NAME}
     - name: Kubernetes delete secrect
-      run: kubectl delete secret mysecret 
+      run: sudo kubectl delete secret mysecret 
