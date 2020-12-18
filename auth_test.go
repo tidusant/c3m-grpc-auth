@@ -82,7 +82,7 @@ func TestLoginCorrect(t *testing.T) {
 }
 func TestCheckLoginWithSession(t *testing.T) {
 	rs := doCall("TestCheckLoginWithSession", "aut", "", t)
-	if rs.Status != 2 {
+	if rs.Status != 1 {
 		t.Fatalf("Test fail: User login but cannot test")
 	}
 }
