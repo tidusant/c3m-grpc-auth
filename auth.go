@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tidusant/c3m-common/c3mcommon"
 	"github.com/tidusant/c3m-common/log"
 
 	pb "github.com/tidusant/c3m-grpc-protoc/protoc"
@@ -58,9 +57,9 @@ func (s *service) Call(ctx context.Context, in *pb.RPCRequest) (*pb.RPCResponse,
 func auth(usex models.UserSession) models.RequestResult {
 	rs := rpch.GetLogin(usex.Session)
 	if rs.UserId.Hex() == "" {
-		return c3mcommon.ReturnJsonMessage("0", "user not logged in", "", "")
+		return models.RequestResult{Error: "user not logged in"}
 	} else {
-		return c3mcommon.ReturnJsonMessage("1", "", "user logged in", `{"userid":"`+rs.UserId.Hex()+`","sex":"`+usex.Session+`","shop":"`+rs.ShopId+`"}`)
+		return models.RequestResult{Error: "", Status: 1, Data: `{"userid":"` + rs.UserId.Hex() + `","sex":"` + usex.Session + `","shop":"` + rs.ShopId + `"}`}
 	}
 }
 
@@ -69,25 +68,29 @@ func login(usex models.UserSession) models.RequestResult {
 
 	args := strings.Split(usex.Params, ",")
 	if len(args) < 2 {
-		return c3mcommon.ReturnJsonMessage("0", "empty username or pass", "", "")
+		return models.RequestResult{Error: "empty username or pass"}
 	}
 	user := args[0]
 	pass := args[1]
 	if rpch.Login(user, pass, usex.Session, usex.UserIP) {
 		reply := auth(usex)
-		if reply.Status == "1" {
+		if reply.Status == 1 {
 			var rs map[string]string
 			json.Unmarshal([]byte(reply.Data), &rs)
-			return c3mcommon.ReturnJsonMessage("1", "", "logged in", `{"sex":"`+rs["sex"]+`","shop":"`+rs["shop"]+`"}`)
+			return models.RequestResult{
+				Error:   "",
+				Status:  1,
+				Message: "logged in",
+				Data:    `{"sex":"` + rs["sex"] + `","shop":"` + rs["shop"] + `"}`}
 		}
 	}
-	return c3mcommon.ReturnJsonMessage("0", "login fail", "", "")
+	return models.RequestResult{Error: "Login failed"}
 
 }
 
 func logout(session string) models.RequestResult {
 	rpch.Logout(session)
-	return c3mcommon.ReturnJsonMessage("1", "", "login success", "")
+	return models.RequestResult{Error: "", Status: 1, Message: "Logout success"}
 
 }
 func main() {

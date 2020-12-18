@@ -63,32 +63,32 @@ func TestUnknowAction(t *testing.T) {
 
 func TestLoginWithSpecialChar(t *testing.T) {
 	rs := doCall("TestLoginWithSpecialChar", "l", c3mcommon.GetSpecialChar(), t)
-	if rs.Status != "0" {
+	if rs.Status != 0 {
 		t.Fatalf("Test fail: User logged in")
 	}
 }
 
 func TestLoginFail(t *testing.T) {
 	rs := doCall("TestLoginFail", "l", "abc,123", t)
-	if rs.Status != "0" {
+	if rs.Status != 0 {
 		t.Fatalf("Test fail: User logged in")
 	}
 }
 func TestLoginCorrect(t *testing.T) {
 	rs := doCall("TestLoginCorrect", "l", "demo,123", t)
-	if rs.Status != "1" {
+	if rs.Status != 1 {
 		t.Fatalf("Test fail: User cannot log in")
 	}
 }
 func TestCheckLoginWithSession(t *testing.T) {
-	rs := doCall("TestCheckLoginWithSession", "test", "", t)
-	if rs.Status != "1" {
+	rs := doCall("TestCheckLoginWithSession", "aut", "", t)
+	if rs.Status != 2 {
 		t.Fatalf("Test fail: User login but cannot test")
 	}
 }
 func TestCheckLoginWithSession_Portal(t *testing.T) {
 	rs := doCall("TestCheckLoginWithSession_Portal", "aut", "", t)
-	if rs.Status != "1" || strings.Index(rs.Data, "[+]") < 3 {
+	if rs.Status != 1 || strings.Index(rs.Data, `"userid"`) < 1 {
 		t.Fatalf("Test fail: User login but cannot auth")
 	}
 }
