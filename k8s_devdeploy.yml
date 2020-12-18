@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: colis-dev
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: c3m_grpc_auth
+  namespace: colis-dev
+  labels:
+    app: c3madmin_portal
+spec:
+  replicas: 2 #We always want more than 1 replica for HA
+  selector:
+    matchLabels:
+      app: c3m_grpc_auth
+  template:
+    metadata:
+      labels:
+        app: c3m_grpc_auth
+    spec:
+      containers:
+        - name: c3m_grpc_auth #1st container
+          image: tidusant/c3m_grpc_auth:latest #Dockerhub image
+          ports:
+            - containerPort: 8901 #Exposes the port 8080 of the container test
+          env:
+            - name: CHADMIN_URI
+                valueFrom:
+                  secretKeyRef:
+                    name: mysecret
+                    key: devdb_url
+            - name: CHADMIN_DB
+                valueFrom:
+                  secretKeyRef:
+                    name: mysecret
+                    key: devdb_name
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: c3m_grpc_auth-service
+  namespace: colis-dev
+spec:
+  type: NodePort
+  selector:
+    app: c3m_grpc_auth
+  ports:
+    - name: c3m_grpc_auth-port
+      protocol: TCP
+      port: 8081
+      nodePort: 38081 #must be between 30000 - 32767
