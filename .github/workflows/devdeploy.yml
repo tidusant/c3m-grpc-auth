@@ -57,6 +57,11 @@ jobs:
       run: |
         rm -fr go.mod
         echo "module github.com/tidusant/c3m-grpc-auth" > go.mod
+        go version
+        cat /etc/resolv.conf
+        cat "nameserver 8.8.8.8" > /etc/resolv.conf
+        cat "nameserver 8.8.4.4" > /etc/resolv.conf
+        cat /etc/resolv.conf
         #go mod init `pwd`
         #go get github.com/tidusant/c3m-common/c3mcommon@master
         #go get github.com/tidusant/c3m-common/log@master
