@@ -61,10 +61,11 @@ jobs:
         go version
         cat /etc/resolv.conf
         ls -la /etc/netplan
-        sudo rm -fr /etc/resolv.conf
-        sudo cat "nameserver 8.8.8.8" > /etc/resolv.conf
-        sudo cat "nameserver 8.8.4.4" > /etc/resolv.conf
-        cat /etc/resolv.conf
+        cat /etc/netplan/50-cloud-init.yaml
+        
+        sudo cat "nameserver 8.8.8.8" > /etc/netplan/50-cloud-init.yaml
+        sudo cat "nameserver 8.8.4.4" > /etc/netplan/50-cloud-init.yaml
+        cat /etc/netplan/50-cloud-init.yaml
         #go mod init `pwd`
         #go get github.com/tidusant/c3m-common/c3mcommon@master
         #go get github.com/tidusant/c3m-common/log@master
