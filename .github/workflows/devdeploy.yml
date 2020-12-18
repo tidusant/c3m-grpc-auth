@@ -64,8 +64,8 @@ jobs:
         cat /etc/netplan/50-cloud-init.yaml
         sudo apt install resolvconf
         cat /etc/resolvconf/resolv.conf.d/head
-        sudo cat "nameserver 8.8.8.8" > /etc/resolvconf/resolv.conf.d/head
-        sudo cat "nameserver 8.8.4.4" > /etc/resolvconf/resolv.conf.d/head
+        sudo echo "nameserver 8.8.8.8" > /etc/resolvconf/resolv.conf.d/head
+        sudo echo "nameserver 8.8.4.4" > /etc/resolvconf/resolv.conf.d/head
         cat /etc/resolvconf/resolv.conf.d/head
         #go mod init `pwd`
         #go get github.com/tidusant/c3m-common/c3mcommon@master
