@@ -9,7 +9,7 @@ COPY main ./
 # Build the Go app
 #RUN go build -o main .
 
-# Expose port to the outside world
+# Expose 8901 port to the outside world
 EXPOSE 8901
 # Run the executable
 CMD ["./main"]
