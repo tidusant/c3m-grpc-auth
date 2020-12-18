@@ -64,7 +64,7 @@ jobs:
         go get github.com/tidusant/chadmin-repo/cuahang@master
 
     - name: Test
-      run: go test -v ./...
+      run: env CHADMIN_URI="${{ secrets.DEV_DB_URL }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
 
     - name: Build
       run: env CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${DEPLOY_NAME} .
@@ -82,8 +82,12 @@ jobs:
     runs-on: self-hosted
     needs: [check,build]
     steps:
+    - name: Kubernetes create secrect
+      run: kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URL }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
     - name: Kubernetes deploy
       run: |
         sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
         #force pull latest image
         sudo kubectl -n ${SERVER} rollout restart deploy ${DEPLOY_NAME}
+    - name: Kubernetes delete secrect
+      run: kubectl delete secret mysecret 
