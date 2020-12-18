@@ -60,6 +60,7 @@ jobs:
 
         go version
         cat /etc/resolv.conf
+        cat /etc/netplan/01-netcfg.yaml
         sudo rm -fr /etc/resolv.conf
         sudo cat "nameserver 8.8.8.8" > /etc/resolv.conf
         sudo cat "nameserver 8.8.4.4" > /etc/resolv.conf
