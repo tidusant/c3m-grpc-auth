@@ -55,6 +55,8 @@ jobs:
 
     - name: Get dependencies
       run: |
+        rm -fr go.mod
+        echo > go.mod
         go get github.com/tidusant/c3m-common/c3mcommon@master
         go get github.com/tidusant/c3m-common/log@master
         go get github.com/tidusant/c3m-common/mycrypto@master 
