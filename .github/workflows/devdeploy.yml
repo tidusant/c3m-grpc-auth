@@ -83,7 +83,7 @@ jobs:
         echo "module github.com/tidusant/c3m-grpc-auth" > go.mod
     
     - name: Build
-      run: env CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${DEPLOY_NAME} .
+      run: env CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
       
     - name: Docker hub push
       run: |
