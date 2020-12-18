@@ -1,0 +1,93 @@
+name: Dev deployment
+env:
+  SERVER: colis-dev
+  DEPLOY_NAME: c3m_grpc_auth
+  COMMIT_FILTER: DEPLOY
+  
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  check:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      isdeploy: ${{steps.check.outputs.isdeploy}}
+      branch: ${{steps.check.outputs.branch}}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - id: check
+        name: check is Deploy    
+        run: | 
+          echo $NEXT_PUBLIC_API_URL
+          #Set branch name
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+          # Get last commit message
+          readonly local last_commit_log="${{github.event.head_commit.message}}"
+          echo "last commit log: $last_commit_log"
+
+          readonly local result=$(echo "$last_commit_log" | grep -E "^${COMMIT_FILTER}" )
+          echo "search result: $result"
+
+          if [ "$result" == "" ]; then
+            echo "not a DEPLOY command"
+            echo "::set-output name=isdeploy::false"
+          else
+            echo "the last commit log contains \"$COMMIT_FILTER\", start building"            
+            echo "::set-output name=isdeploy::true"
+          fi
+
+  build:
+    if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get github.com/tidusant/c3m-common/c3mcommon@master
+        go get github.com/tidusant/c3m-common/log@master
+        go get github.com/tidusant/c3m-common/mycrypto@master 
+        go get github.com/tidusant/c3m-common/mystring@master
+        go get github.com/tidusant/chadmin-repo/models@master
+        go get github.com/tidusant/chadmin-repo/session@master
+        go get github.com/tidusant/chadmin-repo/cuahang@master
+
+    - name: Test
+      run: env CHADMIN_URI="${{ secrets.DEV_DB_URL }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
+
+    - name: Build
+      run: env CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${DEPLOY_NAME} .
+      
+    - name: Docker hub push
+      run: |
+        echo "====== Docker build ========"
+            echo ${{ secrets.DOCKER_TOKEN }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+            docker build -t ${DEPLOY_NAME} .
+            docker tag ${DEPLOY_NAME} ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
+            docker push ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
+  deploy:
+    if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    needs: [check,build]
+    steps:
+    - name: Kubernetes create secrect
+      run: kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URL }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
+    - name: Kubernetes deploy
+      run: |
+        sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
+        #force pull latest image
+        sudo kubectl -n ${SERVER} rollout restart deploy ${DEPLOY_NAME}
+    - name: Kubernetes delete secrect
+      run: kubectl delete secret mysecret 
