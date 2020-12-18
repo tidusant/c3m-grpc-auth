@@ -29,7 +29,7 @@ func setup() {
 
 }
 func doCall(testname, action, params string, t *testing.T) models.RequestResult {
-	fmt.Println("\n\n==== " + testname + " ====")
+	//fmt.Println("\n\n==== " + testname + " ====")
 	resp, err := svc.Call(ctx, &pb.RPCRequest{AppName: appname, Action: action, Params: params, Session: testsession, UserIP: "127.0.0.1"})
 	if err != nil {
 		t.Fatalf("Test fail: Service error: %s", err.Error())
