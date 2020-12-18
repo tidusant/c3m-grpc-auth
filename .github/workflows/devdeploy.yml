@@ -56,7 +56,7 @@ jobs:
     - name: Get dependencies
       run: |
         rm -fr go.mod
-        go mod init
+        go mod init `pwd`
         go get github.com/tidusant/c3m-common/c3mcommon@master
         go get github.com/tidusant/c3m-common/log@master
         go get github.com/tidusant/c3m-common/mycrypto@master 
