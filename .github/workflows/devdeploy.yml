@@ -1,7 +1,7 @@
 name: Dev deployment
 env:
   SERVER: colis-dev
-  DEPLOY_NAME: c3m_grpc_auth
+  DEPLOY_NAME: c3m-grpc-auth
   COMMIT_FILTER: DEPLOY
   
 on:
@@ -59,7 +59,7 @@ jobs:
     - name: Get dependencies
       run: |
         rm -fr go.mod
-        echo "module github.com/tidusant/c3m-grpc-auth" > go.mod
+        echo "module github.com/tidusant/${DEPLOY_NAME}" > go.mod
     - name: Test
       run: env CHADMIN_URI="${{ secrets.DEV_DB_URI }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
 
