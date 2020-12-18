@@ -63,9 +63,9 @@ jobs:
         echo "module github.com/tidusant/c3m-grpc-auth" > go.mod
 
         go version
-        cat /etc/resolv.conf
-        ls -la /etc/netplan
-        cat /etc/netplan/50-cloud-init.yaml
+        #cat /etc/resolv.conf
+        #ls -la /etc/netplan
+        #cat /etc/netplan/50-cloud-init.yaml
         sudo apt install resolvconf
         cat /etc/resolvconf/resolv.conf.d/head
         sudo echo "nameserver 8.8.8.8" > /etc/resolvconf/resolv.conf.d/head
