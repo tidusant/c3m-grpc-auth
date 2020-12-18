@@ -58,16 +58,16 @@ jobs:
         rm -fr go.mod
         echo "module github.com/tidusant/c3m-grpc-auth" > go.mod
         #go mod init `pwd`
-        go get github.com/tidusant/c3m-common/c3mcommon@master
-        go get github.com/tidusant/c3m-common/log@master
-        go get github.com/tidusant/c3m-common/mycrypto@master 
-        go get github.com/tidusant/c3m-common/mystring@master
-        go get github.com/tidusant/chadmin-repo/models@master
-        go get github.com/tidusant/chadmin-repo/session@master
-        go get github.com/tidusant/chadmin-repo/cuahang@master
+        #go get github.com/tidusant/c3m-common/c3mcommon@master
+        #go get github.com/tidusant/c3m-common/log@master
+        #go get github.com/tidusant/c3m-common/mycrypto@master 
+        #go get github.com/tidusant/c3m-common/mystring@master
+        #go get github.com/tidusant/chadmin-repo/models@master
+        #go get github.com/tidusant/chadmin-repo/session@master
+        #go get github.com/tidusant/chadmin-repo/cuahang@master
 
     - name: Test
-      run: env CHADMIN_URI="${{ secrets.DEV_DB_URL }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
+      run: env CHADMIN_URI="${{ secrets.DEV_DB_URI }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
 
     - name: Build
       run: env CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${DEPLOY_NAME} .
@@ -86,7 +86,7 @@ jobs:
     needs: [check,build]
     steps:
     - name: Kubernetes create secrect
-      run: kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URL }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
+      run: kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
     - name: Kubernetes deploy
       run: |
         sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
