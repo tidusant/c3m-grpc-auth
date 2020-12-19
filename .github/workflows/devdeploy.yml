@@ -3,7 +3,7 @@ env:
   SERVER: colis-dev
   DEPLOY_NAME: c3m-grpc-auth
   COMMIT_FILTER: DEPLOY
-  
+  SLACK_COMMAND: "curl -X POST -H 'Content-type: application/json' --data"
 on:
   push:
     branches: [ master ]
@@ -21,7 +21,7 @@ jobs:
       - id: check
         name: check is Deploy    
         run: | 
-          slackcli -h "general" -t "12312312313123123121231312312" -u "Pentacode" -m "Hello Youtube"
+          ${SLACK_COMMAND} '{"text":"Hello, World!"}' ${{secrets.SLACK_WEBHOOK_URL}}
           exit 1
           echo $NEXT_PUBLIC_API_URL
           #Set branch name
