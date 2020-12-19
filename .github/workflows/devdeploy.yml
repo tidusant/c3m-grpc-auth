@@ -37,7 +37,7 @@ jobs:
           else
             echo "the last commit log contains \"$COMMIT_FILTER\", start building"            
             echo "::set-output name=isdeploy::true"
-            ${SLACK_COMMAND} '{"text":"Start deploy ${DEPLOY_NAME}!"}' ${{secrets.SLACK_WEBHOOK_URL}}
+            ${SLACK_COMMAND} '{"text":"Start deploy ${DEPLOY_NAME} !"}' ${{secrets.SLACK_WEBHOOK_URL}}
           fi
   test:
     if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
