@@ -21,6 +21,8 @@ jobs:
       - id: check
         name: check is Deploy    
         run: | 
+          slackcli -h "general" -t "12312312313123123121231312312" -u "Pentacode" -m "Hello Youtube"
+          exit 1
           echo $NEXT_PUBLIC_API_URL
           #Set branch name
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
