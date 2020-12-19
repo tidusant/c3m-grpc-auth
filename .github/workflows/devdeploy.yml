@@ -100,9 +100,9 @@ jobs:
     needs: [check,build]
     steps:
     - name: Kubernetes delete secrect
-      run: sudo kubectl delete secret mysecret --ignore-not-found
+      run: sudo kubectl -n ${SERVER} delete secret mysecret --ignore-not-found
     - name: Kubernetes create secrect
-      run: sudo kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
+      run: sudo kubectl -n ${SERVER} create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
     - name: Kubernetes deploy
       run: |
         sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
