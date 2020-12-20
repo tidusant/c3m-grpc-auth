@@ -3,7 +3,7 @@ env:
   SERVER: colis-dev
   DEPLOY_NAME: c3m-grpc-auth
   COMMIT_FILTER: DEPLOY
-  
+  SLACK_COMMAND: "curl -X POST -H 'Content-type: application/json' --data"
 on:
   push:
     branches: [ master ]
@@ -20,7 +20,7 @@ jobs:
     steps:
       - id: check
         name: check is Deploy    
-        run: | 
+        run: |           
           echo $NEXT_PUBLIC_API_URL
           #Set branch name
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
@@ -37,6 +37,7 @@ jobs:
           else
             echo "the last commit log contains \"$COMMIT_FILTER\", start building"            
             echo "::set-output name=isdeploy::true"
+            ${SLACK_COMMAND} '{"text":"Start deploy ${DEPLOY_NAME} !"}' ${{secrets.SLACK_WEBHOOK_URL}}
           fi
   test:
     if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
@@ -61,7 +62,9 @@ jobs:
         rm -fr go.mod
         echo "module github.com/tidusant/${DEPLOY_NAME}" > go.mod
     - name: Test
-      run: env CHADMIN_URI="${{ secrets.DEV_DB_URI }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
+      run: |
+        env CHADMIN_URI="${{ secrets.DEV_DB_URI }}" CHADMIN_DB="${{ secrets.DEV_DB_NAME }}" go test -v ./...
+        ${SLACK_COMMAND} '{"text":"Testing Done!"}' ${{secrets.SLACK_WEBHOOK_URL}}
 
   build:
     if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
@@ -88,10 +91,11 @@ jobs:
     - name: Docker hub push
       run: |
         echo "====== Docker build ========"
-            echo ${{ secrets.DOCKER_TOKEN }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
-            docker build -t ${DEPLOY_NAME} .
-            docker tag ${DEPLOY_NAME} ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
-            docker push ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
+        echo ${{ secrets.DOCKER_TOKEN }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin 
+        docker build -t ${DEPLOY_NAME} .
+        docker tag ${DEPLOY_NAME} ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
+        docker push ${{ secrets.DOCKER_USERNAME }}/${DEPLOY_NAME}
+        ${SLACK_COMMAND} '{"text":"Push to docker done!"}' ${{secrets.SLACK_WEBHOOK_URL}}
             
   deploy:
     if: ${{ contains(needs.check.outputs.isdeploy, 'true') }}
@@ -100,12 +104,13 @@ jobs:
     needs: [check,build]
     steps:
     - name: Kubernetes delete secrect
-      run: sudo kubectl delete secret mysecret --ignore-not-found
+      run: sudo kubectl -n ${SERVER} delete secret mysecret --ignore-not-found
     - name: Kubernetes create secrect
-      run: sudo kubectl create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
+      run: sudo kubectl -n ${SERVER} create secret generic mysecret --from-literal=devdb_url='${{ secrets.DEV_DB_URI }}'   --from-literal=devdb_name='${{ secrets.DEV_DB_NAME }}' 
     - name: Kubernetes deploy
       run: |
         sudo kubectl apply -f https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${{needs.check.outputs.branch}}/k8s_devdeploy.yml
         #force pull latest image
         sudo kubectl -n ${SERVER} rollout restart deploy ${DEPLOY_NAME}
+        ${SLACK_COMMAND} '{"text":"Kubernetes deploy done!"}' ${{secrets.SLACK_WEBHOOK_URL}}
    
