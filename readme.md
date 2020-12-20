@@ -5,8 +5,6 @@
 - create go.mod file
 - update latest dependency:
     go clean --modcache
-    
-    
     go get github.com/tidusant/c3m-common/c3mcommon@master
     go get github.com/tidusant/c3m-common/log@master
     go get github.com/tidusant/c3m-common/mycrypto@master
@@ -25,4 +23,4 @@ env CHADMIN_DB_HOST=127.0.0.1:27017 env CHADMIN_DB_NAME=cuahang env CHADMIN_DB_U
 
 
 ### run in docker:
-docker build -t tidusant/colis-grpc-auth . && docker run -p 32001:8901 --env CLUSTERIP=127.0.0.1 --name colis-grpc-auth tidusant/colis-grpc-auth  
+docker build -t tidusant/c3m-grpc-auth .   

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net"
 	"os"
 	"strings"
@@ -33,10 +34,10 @@ func (s *service) Call(ctx context.Context, in *pb.RPCRequest) (*pb.RPCResponse,
 	var usex models.UserSession
 	usex.Session = in.Session
 	usex.Action = in.Action
-	usex.UserID = in.UserID
+
 	usex.UserIP = in.UserIP
 	usex.Params = in.Params
-
+	usex.UserID, _ = primitive.ObjectIDFromHex(in.UserID)
 	if usex.Action == "l" {
 		rs = login(usex)
 	} else if usex.Action == "lo" {
@@ -59,7 +60,7 @@ func auth(usex models.UserSession) models.RequestResult {
 	if rs.UserId.Hex() == "" {
 		return models.RequestResult{Error: "user not logged in"}
 	} else {
-		return models.RequestResult{Error: "", Status: 1, Data: `{"userid":"` + rs.UserId.Hex() + `","sex":"` + usex.Session + `","shop":"` + rs.ShopId + `"}`}
+		return models.RequestResult{Error: "", Status: 1, Data: `{"userid":"` + rs.UserId.Hex() + `","sex":"` + usex.Session + `","shop":"` + rs.ShopId.Hex() + `"}`}
 	}
 }
 

@@ -9,7 +9,7 @@ metadata:
   name: c3m-grpc-auth
   namespace: colis-dev
   labels:
-    app: c3madmin_portal
+    app: c3m-grpc-auth
 spec:
   replicas: 2 #We always want more than 1 replica for HA
   selector:
