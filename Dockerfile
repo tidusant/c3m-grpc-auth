@@ -1,7 +1,13 @@
-FROM scratch
+FROM alpine
 # Add Maintainer Info
 LABEL maintainer="Duy Ha <duyhph@gmail.com>"
 # Set the Current Working Directory inside the container
+RUN apk update \
+    && apk upgrade \
+    && apk add --no-cache \
+    ca-certificates \
+    && update-ca-certificates 2>/dev/null || true
+
 WORKDIR /app
 # Copy exec file and config
 COPY main ./
